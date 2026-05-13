@@ -1,0 +1,26 @@
+.App {
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 50px;
+  color: #333;
+}
+
+nav {
+  margin: 20px 0;
+  font-weight: bold;
+}
+
+nav a {
+  text-decoration: none;
+  color: #007bff;
+  padding: 0 15px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+hr {
+  width: 50%;
+  border: 0.5px solid #ddd;
+}
