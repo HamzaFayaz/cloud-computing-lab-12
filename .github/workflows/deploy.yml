@@ -39,7 +39,7 @@ jobs:
 
       - name: Install dependencies and build
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build
           test -f build/index.html
 
