@@ -1,17 +1,8 @@
 # Lab 13: CI/CD — creates GCE VM (if missing), builds React app, deploys via Nginx
 #
-# GitHub secrets (Settings → Secrets and variables → Actions):
+# GitHub secrets:
 #   GCP_SA_KEY      — full JSON key for GCP service account
 #   GCP_PROJECT_ID  — e.g. gen-lang-client-0073142903
-#
-# One-time on GCP (run once in Cloud Shell or local gcloud):
-#   gcloud compute project-info add-metadata \
-#     --metadata enable-oslogin=TRUE \
-#     --project=gen-lang-client-0073142903
-#
-# Service account roles (minimum):
-#   roles/compute.admin
-#   roles/iam.serviceAccountUser
 
 name: Build and Deploy to GCE
 
@@ -23,7 +14,6 @@ on:
 env:
   NODE_VERSION: "20"
   WEB_ROOT: /var/www/lab13
-  # VM settings — change here if you want a different name/zone
   GCE_INSTANCE: lab13-ci-vm
   GCE_ZONE: us-central1-a
   MACHINE_TYPE: e2-micro
@@ -40,6 +30,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies and build
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -f build/index.html
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -87,11 +89,9 @@ jobs:
 
       - name: Wait for VM bootstrap (first create only)
         if: steps.provision.outputs.created == 'true'
-        run: |
-          echo "Waiting 90s for startup script (Nginx install)..."
-          sleep 90
+        run: sleep 90
 
-      - name: Wait for SSH to be ready
+      - name: Wait for SSH and Nginx
         run: |
           set -euo pipefail
           INSTANCE="${{ env.GCE_INSTANCE }}"
@@ -110,17 +110,6 @@ jobs:
           done
           echo "VM not ready after retries."
           exit 1
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies and build
-        run: |
-          npm ci
-          npm run build
 
       - name: Deploy build to Compute Engine
         run: |
