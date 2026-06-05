@@ -4,3 +4,11 @@ build/
 gcp-sa-key.json
 *.sa.json
 
+# OEL lab documentation (local only, not deployed)
+oel-tasks.md
+oel-progress.md
+oel-guide.md
+oel-guide-ui.md
+docs/
+
+OEL.docx
